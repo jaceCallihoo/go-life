@@ -20,24 +20,32 @@ func NewLife (rows int, cols int) Life {
     life.rows = rows
     life.cols = cols
 
-    var grid = make([][]bool, rows)
-    for i := range grid {
-       grid[i] = make([]bool, cols)
+    life.grid = make([][]bool, rows)
+    life.grid_next = make([][]bool, rows)
+    for i := 0; i < rows; i++ {
+       life.grid[i] = make([]bool, cols)
+       life.grid_next[i] = make([]bool, cols)
     }
-    life.grid = grid
-    life.grid_next = grid
 
     return life
 }
 
+func (l Life) InsertGrid(grid [][]bool) {
+    for i := 0; i < l.rows && i < len(grid); i++ {
+        for j := 0; j < l.cols && j < len(grid[i]); j++ {
+            l.grid[i][j] = grid[i][j]
+        }
+    }
+}
+
 func (l Life) Next() {
-    for i := int(0); i < l.rows; i++ {
-        for j := int(0); j < l.cols; j++ {
+    for i := 0; i < l.rows; i++ {
+        for j := 0; j < l.cols; j++ {
             l.updateNextCell(i, j)
         }
     }
 
-    l.grid = l.grid_next
+    copy2d(l.grid, l.grid_next)
 }
 
 func (l Life) updateNextCell(row int, col int) {
@@ -107,8 +115,8 @@ func (l Life) countLiveNeighbors(row int, col int) int {
 func (l Life) PrintGrid() {
     var buffer = make([]byte, l.rows * (l.cols + 1))
 
-    for i := int(0); i < l.rows; i++ {
-        for j := int(0); j < l.cols; j++ {
+    for i := 0; i < l.rows; i++ {
+        for j := 0; j < l.cols; j++ {
             if l.grid[i][j]  == true {
                 buffer[(i * (l.cols + 1)) + j] = byte('#')
             } else {
@@ -119,5 +127,16 @@ func (l Life) PrintGrid() {
     }
 
     os.Stdout.Write(buffer)
-    fmt.Println(strings.Repeat("-", int(l.cols)))
+    fmt.Println(strings.Repeat("-", l.cols))
+}
+
+func copy2d[T any](dest, src [][]T) int {
+    var numCoppied = 0
+
+    for i := range src {
+        dest[i] = make([]T, len(src[i]))
+        numCoppied += copy(dest[i], src[i])
+    }
+
+    return numCoppied
 }
