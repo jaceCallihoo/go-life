@@ -1,8 +1,6 @@
 package life
 
 import (
-    "fmt"
-    "strings"
     "os"
 )
 
@@ -145,21 +143,28 @@ func (l Life) countLiveNeighbors(row int, col int) int {
 }
 
 func (l Life) PrintGrid() {
-    var buffer = make([]byte, l.rows * (l.cols + 1))
+    var separatorLen = l.cols + 1
+    var rowLen = l.cols + 1
+    var buffer = make([]byte, (l.rows * rowLen) + separatorLen)
 
     for i := 0; i < l.rows; i++ {
         for j := 0; j < l.cols; j++ {
             if l.grid[i][j]  == true {
-                buffer[(i * (l.cols + 1)) + j] = byte('#')
+                buffer[(i * rowLen) + j] = '#'
             } else {
-                buffer[(i * (l.cols + 1)) + j] = byte(' ')
+                buffer[(i * rowLen) + j] = ' '
             }
         }
-        buffer[(i * (l.cols + 1)) + l.cols] = byte('\n')
+        buffer[(i * (l.cols + 1)) + l.cols] = '\n'
     }
 
+    for i := 0; i < separatorLen - 1; i++ {
+        buffer[(l.rows * rowLen) + i] = '-'
+    }
+
+    buffer[len(buffer) - 1] = '\n'
+
     os.Stdout.Write(buffer)
-    fmt.Println(strings.Repeat("-", l.cols))
 }
 
 func copy2d[T any](dest, src [][]T) int {
