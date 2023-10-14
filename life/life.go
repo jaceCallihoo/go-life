@@ -14,7 +14,6 @@ type Life struct {
 }
 
 func NewLife (rows int, cols int) Life {
-
     var life = Life{}
 
     life.rows = rows
@@ -36,6 +35,39 @@ func (l Life) InsertGrid(grid [][]bool) {
             l.grid[i][j] = grid[i][j]
         }
     }
+}
+
+func GridFromFile(path string) ([][]bool, error)  {
+    var data, err = os.ReadFile(path)
+
+    if err != nil {
+        return nil, err
+    }
+
+    var lines [][]byte
+    var lineStart = 0
+    for i := range data {
+        if data[i] == '\n' {
+            if i > 0 && data[i - 1] == '\r' {
+                lines = append(lines, data[lineStart:i-1])
+                lineStart = i + 1
+            } else {
+                lines = append(lines, data[lineStart:i])
+                lineStart = i + 1
+            }
+        }
+    }
+
+    var grid = make([][]bool, len(lines))
+    for i := range lines {
+        var row = make([]bool, len(lines[i]))
+        for j := range lines[i] {
+            row[j] = lines[i][j] == '#'
+        }
+        grid[i] = row
+    }
+
+    return grid, nil
 }
 
 func (l Life) Next() {

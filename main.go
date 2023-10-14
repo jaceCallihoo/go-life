@@ -2,7 +2,9 @@ package main
 
 import (
     "time"
+    "os"
     Life "github.com/jaceCallihoo/go-life/life"
+    "fmt"
 )
 
 const GRID_SIZE = 30
@@ -13,46 +15,16 @@ func main() {
 
     var life = Life.NewLife(GRID_ROWS, GRID_COLS)
 
-    var grid = [][]bool {
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, true, false, false, false, false, false },
-        { false, false, false, false, false, true, false, false, false, false },
-        { false, false, false, true, true, true, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, false, false, false, false, false, false, false, false, false },
+    fmt.Println(rune('\n'))
+
+    var grid, err = Life.GridFromFile("./grids/1.txt")
+
+    if err != nil {
+        os.Stderr.WriteString(err.Error() + "\n")
+        os.Exit(1)
     }
 
     life.InsertGrid(grid)
-
-    // life.Grid[15][16] = true
-    // life.Grid[16][17] = true
-    // life.Grid[17][15] = true
-    // life.Grid[17][16] = true
-    // life.Grid[17][17] = true
 
     life.PrintGrid()
 
