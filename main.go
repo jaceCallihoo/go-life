@@ -24,7 +24,9 @@ func main() {
         os.Exit(1)
     }
 
-    life.InsertGrid(grid)
+    life.InsertGrid(grid, 20, 5)
+    life.InsertGrid(grid, 0, 0)
+    life.InsertGrid(grid, 0, 15)
 
     life.PrintGrid()
 

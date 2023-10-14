@@ -29,10 +29,10 @@ func NewLife (rows int, cols int) Life {
     return life
 }
 
-func (l Life) InsertGrid(grid [][]bool) {
-    for i := 0; i < l.rows && i < len(grid); i++ {
-        for j := 0; j < l.cols && j < len(grid[i]); j++ {
-            l.grid[i][j] = grid[i][j]
+func (l Life) InsertGrid(grid [][]bool, xOffset int, yOffset int) {
+    for i := 0; i < l.rows + yOffset && i < len(grid); i++ {
+        for j := 0; j < l.cols + xOffset && j < len(grid[i]); j++ {
+            l.grid[i + yOffset][j + xOffset] = grid[i][j]
         }
     }
 }
