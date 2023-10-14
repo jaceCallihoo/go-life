@@ -4,7 +4,6 @@ import (
     "time"
     "os"
     Life "github.com/jaceCallihoo/go-life/life"
-    "fmt"
 )
 
 const GRID_SIZE = 30
@@ -15,18 +14,14 @@ func main() {
 
     var life = Life.NewLife(GRID_ROWS, GRID_COLS)
 
-    fmt.Println(rune('\n'))
-
-    var grid, err = Life.GridFromFile("./grids/1.txt")
+    var grid, err = Life.GridFromFile("./grids/4.txt")
 
     if err != nil {
         os.Stderr.WriteString(err.Error() + "\n")
         os.Exit(1)
     }
 
-    life.InsertGrid(grid, 20, 5)
-    life.InsertGrid(grid, 0, 0)
-    life.InsertGrid(grid, 0, 15)
+    life.InsertGrid(grid, 10, 10)
 
     life.PrintGrid()
 
