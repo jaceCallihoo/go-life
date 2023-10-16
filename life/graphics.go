@@ -87,7 +87,7 @@ func Test() {
     ebiten.SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     ebiten.SetWindowTitle("Conway's Game of Life")
 
-    var game = ptr(NewGame())
+    var game = Ptr(NewGame())
 
     if err := ebiten.RunGame(game); err != nil {
         panic(err)
@@ -107,19 +107,12 @@ func NewGame() Game {
     game.lastStepTime = time.Now()
     game.stepDelay = 200 * time.Millisecond
 
-    var grid, _ = GridFromFile("./grids/7.txt")
-    game.life.InsertGrid(grid, 20, 10)
-
-    var grid2, _ = GridFromFile("./grids/4.txt")
-    game.life.InsertGrid(grid2, 50, 20)
-
-    // var grid3, _ = GridFromFile("./grids/8.txt")
-    // game.life.InsertGrid(grid3, 50, 10)
+    game.life.InsertGrid(GRID8, 20, 10)
 
     return game
 }
 
-func ptr[T any](val T) *T {
+func Ptr[T any](val T) *T {
     return &val
 }
 
