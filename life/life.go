@@ -12,7 +12,7 @@ type Life struct {
 }
 
 func NewLife (rows int, cols int) Life {
-    var life = Life{}
+    var life = Life {}
 
     life.rows = rows
     life.cols = cols

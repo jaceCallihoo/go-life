@@ -2,26 +2,31 @@ package main
 
 import (
     "time"
-    "os"
     Life "github.com/jaceCallihoo/go-life/life"
 )
 
-const GRID_SIZE = 30
+const GRID_SIZE = 60
 const GRID_ROWS = GRID_SIZE
 const GRID_COLS = GRID_SIZE
 
 func main() {
 
+    Life.Test()
+
+    return
+
     var life = Life.NewLife(GRID_ROWS, GRID_COLS)
 
-    var grid, err = Life.GridFromFile("./grids/4.txt")
+    var grid, err = Life.GridFromFile("./grids/7.txt")
 
     if err != nil {
-        os.Stderr.WriteString(err.Error() + "\n")
-        os.Exit(1)
+        panic(err)
     }
 
-    life.InsertGrid(grid, 10, 10)
+    life.InsertGrid(grid, 20, 10)
+
+    var grid2, _ = Life.GridFromFile("./grids/4.txt")
+    life.InsertGrid(grid2, 25, 35)
 
     life.PrintGrid()
 
