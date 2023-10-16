@@ -2,8 +2,14 @@ package life
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-    "image/color"
     "fmt"
+)
+
+const (
+    CELL_WIDTH = 3
+    CELL_HEIGHT = 3
+    WINDOW_WIDTH = 200
+    WINDOW_HEIGHT = 300
 )
 
 type Game struct {
@@ -13,49 +19,28 @@ type Game struct {
 
 func (g *Game) Update() error {
     g.life.Next()
-
     fmt.Println(ebiten.ActualTPS())
 
     return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-
     var width, height = g.LogicalSize()
     var pixels = make([]byte, 4 * width * height)
 
-    pixels[100] = 0xff
-    pixels[101] = 0xff
-    pixels[102] = 0xff
-
     for i := range g.life.grid {
         for j := range g.life.grid[i] {
-
+            if g.life.grid[i][j] == true {
+                pixels[(i * g.life.cols + j) * 4] = 0xff
+            }
         }
     }
 
     screen.WritePixels(pixels)
-
-    return
-
-    for i := range g.life.grid {
-        for j := range g.life.grid[i] {
-            var im = g.images[i][j]
-            var co = color.RGBA{R: 255, G: uint8(i * 4), B: uint8(j * 4), A:255}
-            if g.life.grid[i][j] == false {
-                co = color.RGBA{}
-            }
-            im.Fill(co)
-            var op = &ebiten.DrawImageOptions{}
-            op.GeoM.Translate(float64(j) * 2, float64(i) * 2)
-            screen.DrawImage(im, op)
-        }
-    }
 }
 
 func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeight int) {
-
-    return oudsiteWidth, outsideHeight
+    return oudsiteWidth / CELL_WIDTH, outsideHeight / CELL_HEIGHT
 }
 
 func (g *Game) LogicalSize() (int, int) {
@@ -64,11 +49,10 @@ func (g *Game) LogicalSize() (int, int) {
 }
 
 func Test() {
-
-    ebiten.SetWindowSize(640, 480)
+    ebiten.SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     ebiten.SetWindowTitle("Conway's Game of Life")
 
-    var game = ptr(NewGame(60, 60))
+    var game = ptr(NewGame())
 
     if err := ebiten.RunGame(game); err != nil {
         panic(err)
@@ -76,9 +60,10 @@ func Test() {
 }
 
 
-func NewGame(rows, cols int) Game {
+func NewGame() Game {
     var game = Game {}
 
+    var cols, rows = game.LogicalSize()
     game.life = NewLife(rows, cols)
 
     game.images = make([][]*ebiten.Image, rows)
