@@ -2,14 +2,11 @@ package life
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-    "fmt"
+    // "fmt"
     "time"
 )
 
 const (
-    WINDOW_WIDTH = 400
-    WINDOW_HEIGHT = 600
-
     LOGICAL_FRACTION = 4
     LOGICAL_WIDTH_FRACTION = LOGICAL_FRACTION
     LOGICAL_HEIGHT_FRACTION = LOGICAL_FRACTION
@@ -19,12 +16,22 @@ const (
     BLUE = 2
 )
 
+var (
+    COLOR_NIGHT_GRAY = Color{R: 60, G: 60, B: 75}
+)
+
 type Game struct {
     life Life
     stepDelay time.Duration
     lastStepTime time.Time
-    pixels [][][]byte
-    pixelsFlat []byte
+    pixelsGrid [][][]byte
+    pixels []byte
+    logicalWidthFraction int
+    logicalHeightFraction int
+}
+
+type Color struct {
+    R, G, B byte
 }
 
 func (g *Game) Update() error {
@@ -33,98 +40,74 @@ func (g *Game) Update() error {
         g.life.Next()
         g.lastStepTime = now
     }
-    fmt.Println(ebiten.ActualTPS())
+
+    // fmt.Printf("FPS: %.2f\n", ebiten.ActualTPS())
 
     return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-    var width, height = g.LogicalSize()
-    var pixels = make([]byte, 4 * width * height)
-    var pixels2d = Fracture(pixels, height)
+    for i := range g.life.grid {
+        for j := range g.life.grid[i] {
+            if g.life.grid[i][j] == true {
+                var x = byte((255 / g.life.rows) * i)
+                var y = byte((255 / g.life.cols) * j)
+                writePixel(g.pixelsGrid[i][j], Color{R: 200, G: x, B: y})
+            } else {
+                writePixel(g.pixelsGrid[i][j], COLOR_NIGHT_GRAY)
+            }
+        }
+    }
+
+    screen.WritePixels(g.pixels)
+}
+
+func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeight int) {
+    return oudsiteWidth / g.logicalWidthFraction, outsideHeight / g.logicalHeightFraction
+}
+
+func (g *Game) logicalSize() (int, int) {
+    var screenWidth, screenHeight = ebiten.WindowSize()
+    return g.Layout(screenWidth, screenHeight)
+}
+
+func NewGame() Game {
+    var game = Game {}
+
+    game.lastStepTime = time.Now()
+    game.stepDelay = 200 * time.Millisecond
+
+    game.logicalWidthFraction = LOGICAL_FRACTION
+    game.logicalHeightFraction = LOGICAL_FRACTION
+
+    var cols, rows = game.logicalSize()
+    game.life = NewLife(rows, cols)
+
+    game.setPixles()
+
+    return game
+}
+
+func (g *Game) setPixles() {
+    var width, height = g.logicalSize()
+    var pixels1d = make([]byte, 4 * width * height)
+    var pixels2d = Fracture(pixels1d, height)
     var pixels3d = make([][][]byte, height)
 
     for i := range pixels2d {
         pixels3d[i] = Fracture(pixels2d[i], width)
     }
 
-    for i := range g.life.grid {
-        for j := range g.life.grid[i] {
-            if g.life.grid[i][j] == true {
-                pixels3d[i][j][RED] = 255
-                pixels3d[i][j][BLUE] = 50
-                pixels3d[i][j][GREEN] = 50
-            } else {
-                pixels3d[i][j][GREEN] = 100
-                pixels3d[i][j][BLUE] = 100
-            }
-        }
+    g.pixels = pixels1d
+    g.pixelsGrid = pixels3d
+}
+
+func writePixel(pixel []byte, color Color) {
+    if len(pixel) != 4 {
+        panic("writePixel should only take byte arrays of length 4")
     }
 
-    // for i := range g.life.grid {
-    //     for j := range g.life.grid[i] {
-    //         if g.life.grid[i][j] == true {
-    //             pixels[(i * g.life.cols + j) * 4] = 0xff
-    //         } else {
-    //             pixels[(i * g.life.cols + j) * 4 + 1] = 0xff
-    //         }
-    //     }
-    // }
-
-    screen.WritePixels(pixels)
-}
-
-func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeight int) {
-    return oudsiteWidth / LOGICAL_WIDTH_FRACTION, outsideHeight / LOGICAL_HEIGHT_FRACTION
-}
-
-func (g *Game) LogicalSize() (int, int) {
-    var screenWidth, screenHeight = ebiten.WindowSize()
-    return g.Layout(screenWidth, screenHeight)
-}
-
-func Test() {
-    ebiten.SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
-
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
-}
-
-
-func NewGame() Game {
-
-    // if screen size > || < max / min screen size, panic
-
-    var game = Game {}
-
-    var cols, rows = game.LogicalSize()
-    game.life = NewLife(rows, cols)
-
-    game.lastStepTime = time.Now()
-    game.stepDelay = 200 * time.Millisecond
-
-    game.life.InsertGrid(GRID8, 20, 10)
-
-    return game
-}
-
-func Ptr[T any](val T) *T {
-    return &val
-}
-
-func Fracture[T any](src []T, pieces int) [][]T {
-    var fractured = make([][]T, pieces)
-    var pieceLength = len(src) / pieces
-
-    for i := range fractured {
-        var pieceStart = i * pieceLength
-        var pieceEnd = pieceStart + pieceLength
-        fractured[i] = src[pieceStart:pieceEnd]
-    }
-
-    return fractured
+    pixel[RED] = color.R
+    pixel[GREEN] = color.G
+    pixel[BLUE] = color.B
 }

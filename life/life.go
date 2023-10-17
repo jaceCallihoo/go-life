@@ -28,9 +28,9 @@ func NewLife (rows int, cols int) Life {
 }
 
 func (l Life) InsertGrid(grid [][]bool, xOffset int, yOffset int) {
-    for i := 0; i < l.rows + xOffset && i < len(grid); i++ {
-        for j := 0; j < l.cols + yOffset && j < len(grid[i]); j++ {
-            l.grid[i + xOffset][j + yOffset] = grid[i][j]
+    for i := 0; i + yOffset < l.rows && i < len(grid); i++ {
+        for j := 0; j + xOffset < l.cols && j < len(grid[i]); j++ {
+            l.grid[i + yOffset][j + xOffset] = grid[i][j]
         }
     }
 }
@@ -165,15 +165,4 @@ func (l Life) PrintGrid() {
     buffer[len(buffer) - 1] = '\n'
 
     os.Stdout.Write(buffer)
-}
-
-func copy2d[T any](dest, src [][]T) int {
-    var numCoppied = 0
-
-    for i := range src {
-        dest[i] = make([]T, len(src[i]))
-        numCoppied += copy(dest[i], src[i])
-    }
-
-    return numCoppied
 }

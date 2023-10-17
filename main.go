@@ -11,7 +11,7 @@ const GRID_COLS = GRID_SIZE
 
 func main() {
 
-    Life.Test()
+    Life.Demo4()
 
     return
 
