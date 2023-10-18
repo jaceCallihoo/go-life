@@ -2,14 +2,12 @@ package life
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-    // "fmt"
+    "fmt"
     "time"
 )
 
 const (
     LOGICAL_FRACTION = 4
-    LOGICAL_WIDTH_FRACTION = LOGICAL_FRACTION
-    LOGICAL_HEIGHT_FRACTION = LOGICAL_FRACTION
 
     RED = 0
     GREEN = 1
@@ -18,30 +16,51 @@ const (
 
 var (
     COLOR_NIGHT_GRAY = Color{R: 60, G: 60, B: 75}
+    COLOR_SPACE_BLACK = Color{R: 25, G: 25, B: 35}
+    COLOR_CARBON = Color{R: 30, B: 30, G: 30}
 )
 
 type Game struct {
     life Life
+
     stepDelay time.Duration
     lastStepTime time.Time
+
     pixelsGrid [][][]byte
     pixels []byte
+
     logicalWidthFraction int
     logicalHeightFraction int
+
+    redChannelFunc func(*Game, int, int) byte
+    greenChannelFunc func(*Game, int, int) byte
+    blueChannelFunc func(*Game, int, int) byte
+    inactiveColor Color
 }
+
 
 type Color struct {
     R, G, B byte
 }
 
+// var tempTime = time.Now()
+// var tempIdx = 0
+// var tempColorArray = []Color{COLOR_NIGHT_GRAY, COLOR_SPACE_BLACK, COLOR_CARBON}
+
 func (g *Game) Update() error {
     var now = time.Now()
-    if (now.Sub(g.lastStepTime) >= g.stepDelay) {
+    if now.Sub(g.lastStepTime) >= g.stepDelay {
         g.life.Next()
         g.lastStepTime = now
     }
 
-    // fmt.Printf("FPS: %.2f\n", ebiten.ActualTPS())
+    // if now.Sub(tempTime) >= time.Millisecond * 3000 {
+    //     g.inactiveColor = tempColorArray[tempIdx % len(tempColorArray)]
+    //     tempTime = now
+    //     tempIdx++
+    // }
+
+    fmt.Printf("FPS: %.2f\n", ebiten.ActualTPS())
 
     return nil
 }
@@ -50,11 +69,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
     for i := range g.life.grid {
         for j := range g.life.grid[i] {
             if g.life.grid[i][j] == true {
-                var x = byte((255 / g.life.rows) * i)
-                var y = byte((255 / g.life.cols) * j)
-                writePixel(g.pixelsGrid[i][j], Color{R: 200, G: x, B: y})
+                var color = Color {
+                    R: g.redChannelFunc(g, i, j),
+                    G: g.greenChannelFunc(g, i, j),
+                    B: g.blueChannelFunc(g, i, j),
+                }
+                writePixel(g.pixelsGrid[i][j], color)
             } else {
-                writePixel(g.pixelsGrid[i][j], COLOR_NIGHT_GRAY)
+                writePixel(g.pixelsGrid[i][j], g.inactiveColor)
             }
         }
     }
@@ -79,6 +101,11 @@ func NewGame() Game {
 
     game.logicalWidthFraction = LOGICAL_FRACTION
     game.logicalHeightFraction = LOGICAL_FRACTION
+
+    game.redChannelFunc = rowParabolic
+    game.greenChannelFunc = colParabolic
+    game.blueChannelFunc = flat200
+    game.inactiveColor = COLOR_SPACE_BLACK
 
     var cols, rows = game.logicalSize()
     game.life = NewLife(rows, cols)

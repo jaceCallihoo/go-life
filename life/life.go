@@ -68,14 +68,14 @@ func GridFromFile(path string) ([][]bool, error)  {
     return grid, nil
 }
 
-func (l Life) Next() {
+func (l *Life) Next() {
     for i := 0; i < l.rows; i++ {
         for j := 0; j < l.cols; j++ {
             l.updateNextCell(i, j)
         }
     }
 
-    copy2d(l.grid, l.grid_next)
+    l.grid, l.grid_next = l.grid_next, l.grid
 }
 
 func (l Life) updateNextCell(row int, col int) {
