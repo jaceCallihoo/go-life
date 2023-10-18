@@ -20,7 +20,7 @@ func main() {
     //
     // return
 
-    Life.Demo2()
+    Life.Demo5()
 
     return
 

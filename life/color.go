@@ -1,5 +1,9 @@
 package life
 
+import (
+    "math"
+)
+
 func rowLinear(g *Game, row, col int) byte {
     return byte(row * 255 / g.life.rows)
 }
@@ -18,4 +22,14 @@ func colParabolic(g *Game, row, col int) byte {
 
 func flat200(g *Game, row, col int) byte {
     return byte(200)
+}
+
+func rowSigmoid(g *Game, row, col int) byte {
+    var k = 0.06
+    return byte(255 / (1 + math.Pow(math.E, -(k * float64(row - g.life.rows / 2)))))
+}
+
+func colSigmoid(g *Game, row, col int) byte {
+    var k = 0.06
+    return byte(255 / (1 + math.Pow(math.E, -(k * float64(col - g.life.cols / 2)))))
 }

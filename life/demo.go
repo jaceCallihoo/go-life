@@ -133,6 +133,10 @@ func Demo7() {
 
     game.stepDelay = 200000 * time.Millisecond
 
+    game.redChannelFunc = rowSigmoid
+    game.greenChannelFunc = colSigmoid
+    game.blueChannelFunc = flat200
+
     for i := range game.life.grid {
         for j := range game.life.grid[i] {
             game.life.grid[i][j] = true
