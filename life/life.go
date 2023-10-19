@@ -28,9 +28,13 @@ func NewLife (rows int, cols int) Life {
 }
 
 func (l Life) InsertGrid(grid [][]bool, xOffset int, yOffset int) {
-    for i := 0; i + yOffset < l.rows && i < len(grid); i++ {
-        for j := 0; j + xOffset < l.cols && j < len(grid[i]); j++ {
-            l.grid[i + yOffset][j + xOffset] = grid[i][j]
+    for i := range grid {
+        for j := range grid[i] {
+            var iTarget = i + yOffset
+            var jTarget = j + xOffset
+            if !(iTarget < 0 || iTarget >= l.rows || jTarget < 0 || jTarget >= l.cols) {
+                l.grid[i + yOffset][j + xOffset] = grid[i][j]
+            }
         }
     }
 }

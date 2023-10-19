@@ -42,3 +42,31 @@ func Reflected[T any](matrix [][]T) [][]T {
 
     return ret
 }
+
+func equalSlice[T comparable](a, b []T) bool {
+    if len(a) != len(b) {
+        return false
+    }
+
+    for i := range a {
+        if a[i] != b[i] {
+            return false
+        }
+    }
+
+    return true
+}
+
+func equalSlice2d[T comparable](a, b [][]T) bool {
+    if len(a) != len(b) {
+        return false
+    }
+
+    for i := range a {
+        if !equalSlice(a[i], b[i]) {
+            return false
+        }
+    }
+
+    return true
+}
