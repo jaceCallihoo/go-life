@@ -94,3 +94,102 @@ func Test_InsertGrid(t *testing.T) {
         })
     }
 }
+
+func Test_cellLivesNext(t *testing.T) {
+    var tc = []struct {
+        name string
+        grid [][]bool
+        row int
+        col int
+        expect bool
+    } {
+        {
+            name: "Should say that this live cell dies (of starvation)",
+            grid: [][]bool {
+                {false, false, false},
+                {false, true, false},
+                {false, false, false},
+            },
+            row: 1,
+            col: 1,
+            expect: false,
+        },
+        {
+            name: "Should say that this live cell dies (of overpopulation)",
+            grid: [][]bool {
+                {true, true, false},
+                {false, true, true},
+                {false, true, false},
+            },
+            row: 1,
+            col: 1,
+            expect: false,
+        },
+        {
+            name: "Should say that this live cell lives (3 neighbors)",
+            grid: [][]bool {
+                {false, true, false},
+                {false, true, false},
+                {true, true, false},
+            },
+            row: 1,
+            col: 1,
+            expect: true,
+        },
+        {
+            name: "Should say that this live cell lives (2 neighbors)",
+            grid: [][]bool {
+                {false, false, true},
+                {false, true, false},
+                {false, false, true},
+            },
+            row: 1,
+            col: 1,
+            expect: true,
+        },
+        {
+            name: "Should say that this dead cell lives",
+            grid: [][]bool {
+                {false, false, true},
+                {true, false, false},
+                {true, false, false},
+            },
+            row: 1,
+            col: 1,
+            expect: true,
+        },
+        {
+            name: "Should say that this dead corner cell lives",
+            grid: [][]bool {
+                {false, true, true},
+                {true, true, false},
+                {false, false, true},
+            },
+            row: 0,
+            col: 0,
+            expect: true,
+        },
+        {
+            name: "Should say that this dead cell dies",
+            grid: [][]bool {
+                {false, false, false, false},
+                {false, false, false, false},
+                {false, false, false, false},
+                {false, false, false, false},
+            },
+            row: 3,
+            col: 2,
+            expect: false,
+        },
+    }
+
+    for _, c := range tc {
+        t.Run(c.name, func(t *testing.T) {
+            var life = NewLife(len(c.grid), len(c.grid[0]))
+            life.grid = c.grid
+            if life.cellLivesNext(c.row, c.col) != c.expect {
+                t.Error()
+            }
+        })
+    }
+}
