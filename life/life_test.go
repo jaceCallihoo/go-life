@@ -193,3 +193,80 @@ func Test_cellLivesNext(t *testing.T) {
         })
     }
 }
+
+func Test_countLiveNeighbors(t *testing.T) {
+    var tc = []struct {
+        name string
+        grid [][]bool
+        row int
+        col int
+        expect int
+    } {
+        {
+            name: "Should detect it has a neighbor",
+            grid: [][]bool {
+                {false, false, false},
+                {true, false, false},
+                {false, false, false},
+            },
+            row: 1,
+            col: 1,
+            expect: 1,
+        },
+        {
+            name: "Should detect multiple neighbars",
+            grid: [][]bool {
+                {true, false, false},
+                {false, false, true},
+                {false, true, false},
+            },
+            row: 1,
+            col: 1,
+            expect: 3,
+        },
+        {
+            name: "Should not count given cell towards the total",
+            grid: [][]bool {
+                {true, false, false},
+                {false, true, false},
+                {false, true, false},
+            },
+            row: 1,
+            col: 1,
+            expect: 2,
+        },
+        {
+            name: "Should not count cells that are not neighbor",
+            grid: [][]bool {
+                {true, true, true, true, true},
+                {true, false, false, false, true},
+                {true, false, false, false, true},
+                {true, false, false, false, true},
+                {true, true, true, true, true},
+            },
+            row: 2,
+            col: 2,
+            expect: 0,
+        },
+        {
+            name: "Should not access out of bounds cells",
+            grid: [][]bool {
+                {false},
+            },
+            row: 0,
+            col: 0,
+            expect: 0,
+        },
+    }
+
+    for _, c := range tc {
+        t.Run(c.name, func(t *testing.T) {
+            var life = NewLife(len(c.grid), len(c.grid[0]))
+            life.grid = c.grid
+            var val = life.countLiveNeighbors(c.row, c.col)
+            if val != c.expect {
+                t.Errorf("Expectend %d but recieved %d", c.expect, val)
+            }
+        })
+    }
+}
