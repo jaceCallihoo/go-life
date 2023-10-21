@@ -2,13 +2,18 @@ package life
 
 import (
     "os"
+    // "fmt"
 )
 
 type Life struct {
     rows int
     cols int
     grid [][]bool
-    grid_next [][]bool
+    gridNext [][]bool
+
+    gridStates [][][]bool
+    currentGridState int
+    numGridStates int
 }
 
 func NewLife (rows int, cols int) Life {
@@ -17,12 +22,19 @@ func NewLife (rows int, cols int) Life {
     life.rows = rows
     life.cols = cols
 
-    life.grid = make([][]bool, rows)
-    life.grid_next = make([][]bool, rows)
-    for i := 0; i < rows; i++ {
-       life.grid[i] = make([]bool, cols)
-       life.grid_next[i] = make([]bool, cols)
+    life.numGridStates = 2
+    life.currentGridState = 0
+    life.gridStates = make([][][]bool, life.numGridStates)
+    for i := range life.gridStates {
+        life.gridStates[i] = make([][]bool, rows)
+        for j := range life.gridStates[i] {
+            life.gridStates[i][j] = make([]bool, cols)
+        }
     }
+
+    life.grid = life.gridStates[0]
+    life.gridNext = life.gridStates[1]
+
 
     return life
 }
@@ -79,11 +91,16 @@ func (l *Life) Next() {
         }
     }
 
-    l.grid, l.grid_next = l.grid_next, l.grid
+    l.currentGridState = (l.currentGridState + 1) % l.numGridStates
+    l.grid = l.gridStates[l.currentGridState]
+    l.gridNext = l.gridStates[(l.currentGridState + 1) % l.numGridStates]
+    // fmt.Println("     ", l.currentGridState)
+
+    // l.grid, l.gridNext = l.gridNext, l.grid
 }
 
 func (l Life) updateNextCell(row int, col int) {
-    l.grid_next[row][col] = l.cellLivesNext(row, col)
+    l.gridNext[row][col] = l.cellLivesNext(row, col)
 }
 
 func (l Life) cellLivesNext(row int, col int) bool {
