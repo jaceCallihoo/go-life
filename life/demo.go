@@ -104,11 +104,11 @@ func Demo6() {
 
     var game = Ptr(NewGame())
 
-    game.redChannelFunc = flat200
-    game.greenChannelFunc = flat200
+    game.redChannelFunc = rowSigmoid
+    game.greenChannelFunc = colSigmoid
     game.blueChannelFunc = flat200
 
-    game.stepDelay = 0
+    game.stepDelay = 20 * time.Millisecond
 
     for i := range game.life.grid {
         for j := range game.life.grid[i] {
@@ -140,6 +140,33 @@ func Demo7() {
     for i := range game.life.grid {
         for j := range game.life.grid[i] {
             game.life.grid[i][j] = true
+        }
+    }
+
+    if err := ebiten.RunGame(game); err != nil {
+        panic(err)
+    }
+}
+
+func Demo8() {
+    var window_width = 400
+    var window_height = 400
+    ebiten.SetWindowSize(window_width, window_height)
+    ebiten.SetWindowTitle("Conway's Game of Life")
+
+    var game = Ptr(NewGame())
+
+    game.stepDelay = 100 * time.Millisecond
+
+    game.redChannelFunc = lifetimeRed
+    game.greenChannelFunc = lifetimeGreen
+    game.blueChannelFunc = lifetimeBlue
+
+    for i := range game.life.grid {
+        for j := range game.life.grid[i] {
+            if rand.Intn(2) == 1 {
+                game.life.grid[i][j] = true
+            }
         }
     }
 

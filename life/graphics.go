@@ -2,7 +2,7 @@ package life
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-    "fmt"
+    // "fmt"
     "time"
 )
 
@@ -60,7 +60,7 @@ func (g *Game) Update() error {
     //     tempIdx++
     // }
 
-    fmt.Printf("FPS: %.2f\n", ebiten.ActualTPS())
+    // fmt.Printf("FPS: %.2f\n", ebiten.ActualTPS())
 
     return nil
 }
