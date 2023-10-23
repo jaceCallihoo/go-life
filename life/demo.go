@@ -1,108 +1,65 @@
 package life
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
     "time"
     "math/rand"
 )
 
 func Demo1() {
-    var window_width = 1000
-    var window_height = 1000
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 120, 4)
 
     game.stepDelay = 80 * time.Millisecond
 
-    var gameCols, gameRows = game.logicalSize()
-    game.life.InsertGrid(GRID12, gameCols / 2 - len(GRID12[0]) / 2, gameRows / 2 - len(GRID12) / 2)
+    var rows, cols = game.life.rows, game.life.cols
+    game.life.InsertGrid(GRID12, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo2() {
-    var window_width = 1000
-    var window_height = 900
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.stepDelay = 80 * time.Millisecond
 
-    var gameCols, gameRows = game.logicalSize()
+    var rows, cols = game.life.rows, game.life.cols
+    game.life.InsertGrid(GRID11, cols / 2, rows / 8)
 
-    game.life.InsertGrid(GRID11, gameCols / 2, gameRows / 8)
-
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo3() {
-    var window_width = 600
-    var window_height = 600
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
+    var game = NewGame(50, 50, 4)
 
-    var game = Ptr(NewGame())
+    var rows, cols = game.life.rows, game.life.cols
+    game.life.InsertGrid(GRID9, cols / 2 - len(GRID9[0]) / 2, rows / 2 - len(GRID9) / 2)
 
-    var gameCols, gameRows = game.logicalSize()
-
-    game.life.InsertGrid(GRID9, gameCols / 2 - len(GRID9[0]) / 2, gameRows / 2 - len(GRID9) / 2)
-
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo4() {
-    var window_width = 600
-    var window_height = 400
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.stepDelay = 200 * time.Millisecond
 
-    var gameCols, gameRows = game.logicalSize()
-    game.life.InsertGrid(GRID12, gameCols / 2 - len(GRID12[0]) / 2, gameRows / 2 - len(GRID12) / 2)
+    var rows, cols = game.life.rows, game.life.cols
+    game.life.InsertGrid(GRID12, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo5() {
-    var window_width = 300
-    var window_height = 300
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.stepDelay = 200 * time.Millisecond
 
-    var gameCols, gameRows = game.logicalSize()
-    game.life.InsertGrid(GRID4, gameCols / 2 - len(GRID4[0]) / 2, gameRows / 2 - len(GRID4) / 2)
+    var rows, cols = game.life.rows, game.life.cols
+    game.life.InsertGrid(GRID4, cols / 2 - len(GRID4[0]) / 2, rows / 2 - len(GRID4) / 2)
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo6() {
-    var window_width = 900
-    var window_height = 900
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Jace Callihoo -- Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.redChannelFunc = rowSigmoid
     game.greenChannelFunc = colSigmoid
@@ -118,18 +75,11 @@ func Demo6() {
         }
     }
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo7() {
-    var window_width = 900
-    var window_height = 900
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.stepDelay = 200000 * time.Millisecond
 
@@ -143,24 +93,19 @@ func Demo7() {
         }
     }
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
 
 func Demo8() {
-    var window_width = 400
-    var window_height = 400
-    ebiten.SetWindowSize(window_width, window_height)
-    ebiten.SetWindowTitle("Conway's Game of Life")
-
-    var game = Ptr(NewGame())
+    var game = NewGame(50, 50, 4)
 
     game.stepDelay = 100 * time.Millisecond
 
     game.redChannelFunc = lifetimeRed
     game.greenChannelFunc = lifetimeGreen
     game.blueChannelFunc = lifetimeBlue
+
+    game.inactiveColor = COLOR_KINDA_BLUE
 
     for i := range game.life.grid {
         for j := range game.life.grid[i] {
@@ -170,7 +115,5 @@ func Demo8() {
         }
     }
 
-    if err := ebiten.RunGame(game); err != nil {
-        panic(err)
-    }
+    game.Run()
 }
