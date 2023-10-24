@@ -1,5 +1,9 @@
 package life
 
+import (
+   "cmp"
+)
+
 func copy2d[T any](dest, src [][]T) int {
     var numCoppied = 0
 
@@ -70,3 +74,20 @@ func equalSlice2d[T comparable](a, b [][]T) bool {
 
     return true
 }
+
+func Max[T cmp.Ordered](a, b T) T {
+    if a > b {
+        return a
+    }
+
+    return b
+}
+
+func Min[T cmp.Ordered](a, b T) T {
+    if a < b {
+        return a
+    }
+
+    return b
+}
+
