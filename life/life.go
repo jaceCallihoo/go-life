@@ -2,7 +2,6 @@ package life
 
 import (
     "os"
-    // "fmt"
 )
 
 type Life struct {
@@ -35,8 +34,40 @@ func NewLife (rows int, cols int) Life {
     life.grid = life.gridStates[0]
     life.gridNext = life.gridStates[1]
 
-
     return life
+}
+
+func (l *Life) SetNumGridStates(numGridStates int) {
+    if numGridStates < 2 || numGridStates == l.numGridStates {
+        return 
+    } 
+
+    if numGridStates < l.numGridStates {
+        var diff = l.numGridStates - numGridStates
+
+        var a = l.currentGridState + diff + 1
+        var x = Min(l.numGridStates, a)
+        var rhs = l.gridStates[x:]
+
+        var b = a % l.numGridStates
+        var y = Max(0, b)
+        var lhs = l.gridStates[y:l.currentGridState + 1]
+
+        l.gridStates = append(lhs, rhs...)
+
+        // if l.currentGridState + diff > l.numGridStates {
+        //     var lastIndex = l.currentGridState + 1
+        //     var firstIndex = l.currentGridState - diff
+        //     l.gridStates = l.gridStates[firstIndex:lastIndex]
+        // } else {
+        //     var arr1 = l.gridStates[:]
+        //     var arr2 = l.gridStates[:]
+        //     l.gridStates = append(arr1, arr2...) 
+        // }
+
+    }
+
+    l.numGridStates = numGridStates
 }
 
 func (l Life) InsertGrid(grid [][]bool, xOffset int, yOffset int) {
@@ -94,9 +125,6 @@ func (l *Life) Next() {
     l.currentGridState = (l.currentGridState + 1) % l.numGridStates
     l.grid = l.gridStates[l.currentGridState]
     l.gridNext = l.gridStates[(l.currentGridState + 1) % l.numGridStates]
-    // fmt.Println("     ", l.currentGridState)
-
-    // l.grid, l.gridNext = l.gridNext, l.grid
 }
 
 func (l Life) updateNextCell(row int, col int) {

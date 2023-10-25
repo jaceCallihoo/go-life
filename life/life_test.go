@@ -270,3 +270,93 @@ func Test_countLiveNeighbors(t *testing.T) {
         })
     }
 }
+
+func Test_SetNumGridStates(t *testing.T) {
+    var tc = []struct {
+        name string
+        gridStates [][][]bool
+        currentGridState int
+        expectGridStates [][][]bool
+        expectCurrentGridState int
+    } {
+        {
+            name: "",
+            currentGridState: 1,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 1,
+            expectGridStates: [][][]bool { 
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+        }, 
+    }
+
+    for _, c := range tc {
+        t.Run(c.name, func(t *testing.T) {
+            var expectNumGridStates = len(c.expectGridStates) 
+            var l = NewLife(len(c.gridStates[0]), len(c.gridStates[0][0]))
+            l.currentGridState = c.currentGridState
+            l.gridStates = c.gridStates
+
+            l.SetNumGridStates(expectNumGridStates)
+
+            if l.numGridStates != expectNumGridStates {
+                t.Errorf("Unequal numGridStates - Recieved: %d, Expected %d", l.numGridStates, expectNumGridStates)
+            }
+
+            if len(l.gridStates) != len(c.expectGridStates) {
+                t.Fatalf("Unequal len(gridStates) - Recieved: %d, Expected: %d", len(l.gridStates), len(c.expectGridStates))
+            }
+            
+            for i := range l.gridStates {
+                if !equalSlice2d(l.gridStates[i], c.expectGridStates[i]) {
+                    t.Errorf("Unequal gridState[%d]", i) 
+                }
+            }
+        })
+    }
+}
