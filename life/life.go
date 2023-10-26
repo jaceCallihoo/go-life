@@ -8,7 +8,6 @@ type Life struct {
     rows int
     cols int
     grid [][]bool
-    gridNext [][]bool
 
     gridStates [][][]bool
     currentGridState int
@@ -32,7 +31,6 @@ func NewLife (rows int, cols int) Life {
     }
 
     life.grid = life.gridStates[0]
-    life.gridNext = life.gridStates[1]
 
     return life
 }
@@ -54,17 +52,6 @@ func (l *Life) SetNumGridStates(numGridStates int) {
         var lhs = l.gridStates[y:l.currentGridState + 1]
 
         l.gridStates = append(lhs, rhs...)
-
-        // if l.currentGridState + diff > l.numGridStates {
-        //     var lastIndex = l.currentGridState + 1
-        //     var firstIndex = l.currentGridState - diff
-        //     l.gridStates = l.gridStates[firstIndex:lastIndex]
-        // } else {
-        //     var arr1 = l.gridStates[:]
-        //     var arr2 = l.gridStates[:]
-        //     l.gridStates = append(arr1, arr2...) 
-        // }
-
     }
 
     l.numGridStates = numGridStates
@@ -116,19 +103,18 @@ func GridFromFile(path string) ([][]bool, error)  {
 }
 
 func (l *Life) Next() {
+    var nextGridIndex = (l.currentGridState + 1) % l.numGridStates
+    var nextGrid = l.gridStates[nextGridIndex]
+
+
     for i := 0; i < l.rows; i++ {
         for j := 0; j < l.cols; j++ {
-            l.updateNextCell(i, j)
+            nextGrid[i][j] = l.cellLivesNext(i, j)
         }
     }
 
-    l.currentGridState = (l.currentGridState + 1) % l.numGridStates
-    l.grid = l.gridStates[l.currentGridState]
-    l.gridNext = l.gridStates[(l.currentGridState + 1) % l.numGridStates]
-}
-
-func (l Life) updateNextCell(row int, col int) {
-    l.gridNext[row][col] = l.cellLivesNext(row, col)
+    l.grid = nextGrid
+    l.currentGridState = nextGridIndex
 }
 
 func (l Life) cellLivesNext(row int, col int) bool {
