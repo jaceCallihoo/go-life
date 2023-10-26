@@ -49,7 +49,7 @@ func (l *Life) SetNumGridStates(numGridStates int) {
         var x = Min(l.numGridStates, a)
         var rhs = l.gridStates[x:]
 
-        var b = a % l.numGridStates
+        var b = a - l.numGridStates
         var y = Max(0, b)
         var lhs = l.gridStates[y:l.currentGridState + 1]
 

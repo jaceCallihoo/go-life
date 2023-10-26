@@ -280,7 +280,61 @@ func Test_SetNumGridStates(t *testing.T) {
         expectCurrentGridState int
     } {
         {
-            name: "",
+            name: "Should remove the grid after the current grid state",
+            currentGridState: 0,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 0,
+            expectGridStates: [][][]bool { 
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+        }, 
+        {
+            name: "Should remove the grid affter currentGridState when it's not 0",
             currentGridState: 1,
             gridStates: [][][]bool {
                 {
@@ -333,6 +387,212 @@ func Test_SetNumGridStates(t *testing.T) {
                 },
             },
         }, 
+        {
+            name: "Should remove multiple grids",
+            currentGridState: 1,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 1,
+            expectGridStates: [][][]bool { 
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+        }, 
+        {
+            name: "Should remove grids before the current grid",
+            currentGridState: 4,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 2,
+            expectGridStates: [][][]bool { 
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+        }, 
+        {
+            name: "Should remove grids both before and after the current grid",
+            currentGridState: 3,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 2,
+            expectGridStates: [][][]bool { 
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+            },
+        }, 
+        {
+            name: "",
+            currentGridState: 0,
+            gridStates: [][][]bool {
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+            expectCurrentGridState: 0,
+            expectGridStates: [][][]bool { 
+                {
+                    {true, false, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, true, false},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, true},
+                    {false, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {true, false, false},
+                    {false, false, false},
+                },
+                {
+                    {false, false, false},
+                    {false, true, false},
+                    {false, false, false},
+                },
+            },
+        }, 
     }
 
     for _, c := range tc {
@@ -340,6 +600,7 @@ func Test_SetNumGridStates(t *testing.T) {
             var expectNumGridStates = len(c.expectGridStates) 
             var l = NewLife(len(c.gridStates[0]), len(c.gridStates[0][0]))
             l.currentGridState = c.currentGridState
+            l.numGridStates = len(c.gridStates)
             l.gridStates = c.gridStates
 
             l.SetNumGridStates(expectNumGridStates)
