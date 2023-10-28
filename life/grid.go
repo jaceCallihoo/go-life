@@ -6,7 +6,7 @@ type Grid[T any] struct {
     cols int
 }
 
-func NewGrid[T any](rows, cols int) Grid {
+func NewGrid[T any](rows, cols int) Grid[T] {
     var grid = Grid[T]{}
     grid.data = make([]T, rows * cols)
     grid.rows = rows
