@@ -1,8 +1,11 @@
 package life
 
 import (
-    "github.com/hajimehoshi/ebiten/v2"
-    "time"
+	"fmt"
+	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -16,8 +19,69 @@ var (
     COLOR_SPACE_BLACK = Color{R: 25, G: 25, B: 35}
     COLOR_CARBON = Color{R: 30, G: 30, B: 30}
     COLOR_MEDIUM_SKY = Color{R: 85, G: 120, B: 185}
-    COLOR_KINDA_BLUE  = Color{R: 55, G: 55, B: 95}
+    COLOR_KINDA_BLUE = Color{R: 55, G: 55, B: 95}
+
+    GAME_PARAMS = []GameParam{
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID1,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID2,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID3,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID4,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID5,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID6,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID7,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID8,
+        },
+        {
+            life: NewLife(50, 50),
+            startingGrid: GRID9,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID10,
+        },
+        {
+            life: NewLife(50, 50),
+            startingGrid: GRID11,
+        },
+        {
+            life: NewLife(50, 120),
+            startingGrid: GRID12,
+        },
+    }
 )
+
+type GameParam struct {
+    life Life
+    redChannelFunc func(*Game, int, int) byte
+    greenChannelFunc func(*Game, int, int) byte
+    blueChannelFunc func(*Game, int, int) byte
+    inactiveColor Color 
+    startingGrid [][]bool
+}
+
 
 type Game struct {
     life Life
@@ -41,8 +105,39 @@ type Color struct {
 func (g *Game) Update() error {
     var now = time.Now()
     if now.Sub(g.lastStepTime) >= g.stepDelay {
+        // fmt.Println("update")
         g.life.Next()
         g.lastStepTime = now
+    }
+
+    // todo: use a switch instead?
+    // use up and down arrows to change speed
+    // should the state be saved whene moving back to a "demo"?
+    if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+        fmt.Println("rgiht")
+        cols := 50
+        rows := 50
+        g.life = NewLife(rows, cols)
+        g.redChannelFunc = rowParabolic
+        g.greenChannelFunc = colParabolic
+        g.blueChannelFunc = flat200
+        g.inactiveColor = COLOR_SPACE_BLACK
+        g.life.InsertGrid(GRID12, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
+        g.setPixles()
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+        fmt.Println("up")
+        g.stepDelay -= 50 * time.Millisecond
+        g.stepDelay = max(g.stepDelay, 0)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+        fmt.Println("down")
+        g.stepDelay += 50 * time.Millisecond
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+        // restart the game (set the grid state to the starting grid)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+        fmt.Println("escape")
+        return ebiten.Termination
     }
 
     return nil
@@ -71,8 +166,13 @@ func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeigh
     return g.life.cols, g.life.rows
 }
 
-func NewGame(rows, cols, scale int) Game {
+func NewGame(rows, cols int) Game {
     var game = Game {}
+
+    // initialize all different games
+    for i := range(GAME_PARAMS) {
+        fmt.Println(i)
+    }
 
     game.life = NewLife(rows, cols)
 
@@ -84,7 +184,8 @@ func NewGame(rows, cols, scale int) Game {
     game.blueChannelFunc = flat200
     game.inactiveColor = COLOR_SPACE_BLACK
 
-    ebiten.SetWindowSize(cols * scale, rows * scale)
+    // ebiten.SetWindowSize(cols * scale, rows * scale)
+    game.life.InsertGrid(GRID12, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
 
     game.setPixles()
 

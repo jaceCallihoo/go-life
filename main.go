@@ -1,14 +1,23 @@
 package main
 
 import (
-    // "time"
-    Life "github.com/jaceCallihoo/go-life/life"
-    // "os"
+	// "time"
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/jaceCallihoo/go-life/life"
+	// "os"
 )
 
 const GRID_SIZE = 60
 const GRID_ROWS = GRID_SIZE
 const GRID_COLS = GRID_SIZE
+
+const (
+    gRID_ROWS = 50 
+    gRID_COLS = 50
+    SCALE = 8
+)
 
 func main() {
 
@@ -20,9 +29,20 @@ func main() {
     //
     // return
 
-    Life.Demo8()
+    /*
+    game, err := life.NewGame(gRID_ROWS, gRID_COLS)
+    if err != nil {
+        log.Fatal(err)
+    }
+    */
+    game := life.NewGame(gRID_ROWS, gRID_COLS)
 
-    return
+    ebiten.SetWindowSize(gRID_COLS * SCALE, gRID_ROWS * SCALE)
+    ebiten.SetWindowTitle("Jace: Game of Life")
+    // Life.Demo8()
+    if err := ebiten.RunGame(&game); err != nil {
+	log.Fatal(err)
+    }
 
     // var life = Life.NewLife(GRID_ROWS, GRID_COLS)
     //

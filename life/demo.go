@@ -1,10 +1,10 @@
 package life
 
+/*
 import (
     "time"
     "math/rand"
 )
-
 func Demo1() {
     var game = NewGame(50, 120, 4)
 
@@ -117,3 +117,4 @@ func Demo8() {
 
     game.Run()
 }
+*/
