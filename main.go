@@ -14,9 +14,7 @@ const GRID_ROWS = GRID_SIZE
 const GRID_COLS = GRID_SIZE
 
 const (
-    gRID_ROWS = 50 
-    gRID_COLS = 50
-    SCALE = 8
+    SCALE = 4 
 )
 
 func main() {
@@ -34,9 +32,9 @@ func main() {
         log.Fatal(err)
     }
     */
-    game := life.NewGame(0)
+    game := life.NewGame(100, 100, 4)
 
-    ebiten.SetWindowSize(gRID_COLS * SCALE, gRID_ROWS * SCALE)
+    ebiten.SetWindowSize(game.GetCols() * SCALE, game.GetRows() * SCALE)
     ebiten.SetWindowTitle("Jace: Game of Life")
     // Life.Demo8()
     if err := ebiten.RunGame(&game); err != nil {
