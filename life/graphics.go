@@ -12,6 +12,8 @@ const (
     RED = 0
     GREEN = 1
     BLUE = 2
+
+    SCALE = 4
 )
 
 var (
@@ -21,54 +23,91 @@ var (
     COLOR_MEDIUM_SKY = Color{R: 85, G: 120, B: 185}
     COLOR_KINDA_BLUE = Color{R: 55, G: 55, B: 95}
 
+    CURRENT_GAME_IDX = 0
     GAME_PARAMS = []GameParam{
         {
             life: NewLife(50, 120),
             startingGrid: GRID1,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID2,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID3,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID4,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID5,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID6,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID7,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID8,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 50),
             startingGrid: GRID9,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID10,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 50),
             startingGrid: GRID11,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
         {
             life: NewLife(50, 120),
             startingGrid: GRID12,
+            redChannelFunc: rowParabolic,
+            greenChannelFunc: colParabolic,
+            blueChannelFunc: flat200,
         },
     }
 )
@@ -102,7 +141,9 @@ type Color struct {
     R, G, B byte
 }
 
+var x = 0
 func (g *Game) Update() error {
+    // optimization: add a sleep
     var now = time.Now()
     if now.Sub(g.lastStepTime) >= g.stepDelay {
         // fmt.Println("update")
@@ -113,17 +154,28 @@ func (g *Game) Update() error {
     // todo: use a switch instead?
     // use up and down arrows to change speed
     // should the state be saved whene moving back to a "demo"?
-    if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-        fmt.Println("rgiht")
-        cols := 50
-        rows := 50
-        g.life = NewLife(rows, cols)
-        g.redChannelFunc = rowParabolic
-        g.greenChannelFunc = colParabolic
-        g.blueChannelFunc = flat200
-        g.inactiveColor = COLOR_SPACE_BLACK
-        g.life.InsertGrid(GRID12, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
+    
+    // if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+    x = x + 1
+    fmt.Println(x)
+    if x % 10 == 0 {
+        fmt.Println("right")
+        CURRENT_GAME_IDX++;
+        next_game := GAME_PARAMS[CURRENT_GAME_IDX]
+        g.life = next_game.life
+        fmt.Println(len(g.pixels))
         g.setPixles()
+
+        // todo: set scale in game params
+        ebiten.SetWindowSize(g.life.cols * SCALE, g.life.rows * SCALE)
+
+        time.Sleep(1 * time.Second)
+        fmt.Println(len(g.pixels))
+        // todo: also need to set the window size
+        g.redChannelFunc = next_game.redChannelFunc
+        g.greenChannelFunc = next_game.greenChannelFunc 
+        g.blueChannelFunc = next_game.blueChannelFunc 
+        g.inactiveColor = next_game.inactiveColor
     } else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 
     } else if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
@@ -144,6 +196,12 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+    width, height := ebiten.WindowSize()
+    fmt.Println("height", height, "width", width, "cols", g.life.cols, "rows", g.life.rows)
+    if height != g.life.rows * SCALE || width != g.life.cols * SCALE {
+        fmt.Println("resizing in draw")
+        ebiten.SetWindowSize(g.life.cols * SCALE, g.life.rows * SCALE)
+    }
     for i := range g.life.grid {
         for j := range g.life.grid[i] {
             if g.life.grid[i][j] == true {
@@ -159,6 +217,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
         }
     }
 
+    fmt.Println("Writing pixels:", len(g.pixels))
+    x, y := ebiten.WindowSize()
+    fmt.Println("Window size:", x, y, x * y)
+    screen_bounds := screen.Bounds()
+    fmt.Println("screen bounds", screen_bounds.Max, screen_bounds.Min)
     screen.WritePixels(g.pixels)
 }
 
@@ -166,7 +229,7 @@ func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeigh
     return g.life.cols, g.life.rows
 }
 
-func NewGame(rows, cols int) Game {
+func NewGame(gameParamsIndex int) Game {
     var game = Game {}
 
     // initialize all different games
@@ -174,6 +237,9 @@ func NewGame(rows, cols int) Game {
         fmt.Println(i)
     }
 
+    gameParams := GAME_PARAMS[gameParamsIndex]
+    rows := gameParams.life.rows
+    cols := gameParams.life.cols
     game.life = NewLife(rows, cols)
 
     game.lastStepTime = time.Now()

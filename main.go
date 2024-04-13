@@ -20,7 +20,6 @@ const (
 )
 
 func main() {
-
     // var life = Life.NewLife(GRID_ROWS, GRID_COLS)
     //
     // life.InsertGrid(Life.GRID4, 10, 10)
@@ -35,7 +34,7 @@ func main() {
         log.Fatal(err)
     }
     */
-    game := life.NewGame(gRID_ROWS, gRID_COLS)
+    game := life.NewGame(0)
 
     ebiten.SetWindowSize(gRID_COLS * SCALE, gRID_ROWS * SCALE)
     ebiten.SetWindowTitle("Jace: Game of Life")
