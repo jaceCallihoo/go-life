@@ -1,7 +1,7 @@
 package life
 
 import (
-    "math"
+	"math"
 )
 
 func rowLinear(g *Game, row, col int) byte {
@@ -43,7 +43,7 @@ func countCellLifetime(l Life, row, col int) int {
         cellLifetime++
     }
 
-    for i := l.numGridStates - 1; i > l.currentGridState; i-- {
+    for i := len(l.gridStates) - 1; i > l.currentGridState; i-- {
         if l.gridStates[i][row][col] == false {
             return cellLifetime
         }
@@ -54,7 +54,7 @@ func countCellLifetime(l Life, row, col int) int {
 }
 
 func lifetimeGreen(g *Game, row, col int) byte {
-    var a = float64(g.life.numGridStates - 1)
+    var a = float64(len(g.life.gridStates) - 1)
     var cellLifetime = countCellLifetime(g.life, row, col)
     var x = float64(cellLifetime - 1)
     var y = x * (-1020.0 / a) + 1020
@@ -62,7 +62,7 @@ func lifetimeGreen(g *Game, row, col int) byte {
 }
 
 func lifetimeRed(g *Game, row, col int) byte {
-    var a = float64(g.life.numGridStates - 1)
+    var a = float64(len(g.life.gridStates) - 1)
     var cellLifetime = countCellLifetime(g.life, row, col)
     var x = float64(cellLifetime - 1)
     var y = x * (1020.0 / a)
@@ -70,7 +70,7 @@ func lifetimeRed(g *Game, row, col int) byte {
 }
 
 func lifetimeBlue(g *Game, row, col int) byte {
-    var a = float64(g.life.numGridStates - 1)
+    var a = float64(len(g.life.gridStates) - 1)
     var cellLifetime = countCellLifetime(g.life, row, col)
     var x = float64(cellLifetime - 1)
     var y = x * (-60.0 / a) + 15

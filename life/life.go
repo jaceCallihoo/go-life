@@ -1,7 +1,7 @@
 package life
 
 import (
-    "os"
+	"os"
 )
 
 type Life struct {
@@ -11,7 +11,6 @@ type Life struct {
 
     gridStates [][][]bool
     currentGridState int
-    numGridStates int
 }
 
 func NewLife (rows int, cols int) Life {
@@ -20,9 +19,8 @@ func NewLife (rows int, cols int) Life {
     life.rows = rows
     life.cols = cols
 
-    life.numGridStates = 2
     life.currentGridState = 0
-    life.gridStates = make([][][]bool, life.numGridStates)
+    life.gridStates = make([][][]bool, 2)
     for i := range life.gridStates {
         life.gridStates[i] = make([][]bool, rows)
         for j := range life.gridStates[i] {
@@ -36,25 +34,53 @@ func NewLife (rows int, cols int) Life {
 }
 
 func (l *Life) SetNumGridStates(numGridStates int) {
-    if numGridStates < 2 || numGridStates == l.numGridStates {
+    if numGridStates < 2 || numGridStates == len(l.gridStates) {
         return 
     } 
 
-    if numGridStates < l.numGridStates {
-        var diff = l.numGridStates - numGridStates
+    if numGridStates < len(l.gridStates) {
+        var diff = len(l.gridStates) - numGridStates
 
         var a = l.currentGridState + diff + 1
-        var x = Min(l.numGridStates, a)
+        var x = Min(len(l.gridStates), a)
         var rhs = l.gridStates[x:]
 
-        var b = a - l.numGridStates
+        var b = a - len(l.gridStates)
         var y = Max(0, b)
         var lhs = l.gridStates[y:l.currentGridState + 1]
 
-        l.gridStates = append(lhs, rhs...)
-    }
+        l.gridStates = append(rhs, lhs...)
+        l.currentGridState = numGridStates - 1
+        /*
+        diff := len(l.gridStates) - numGridStates
 
-    l.numGridStates = numGridStates
+        lhsEnd := Min(len(l.gridStates), l.currentGridState + diff + 1)
+        lhsNew := l.gridStates[l.currentGridState:lhsEnd]
+
+        rhsEnd := Max(0, l.currentGridState - diff)
+        rhsNew := l.gridStates[:rhsEnd]
+
+        l.gridStates = append(lhsNew, rhsNew...)
+        l.currentGridState = 0
+        */
+
+    } else {
+        diff := numGridStates - len(l.gridStates)
+
+        rhs := l.gridStates[l.currentGridState:]
+        lhs := l.gridStates[:l.currentGridState]
+
+        newGrids := make([][][]bool, diff)
+        for i := range newGrids {
+            newGrids[i] = make([][]bool, l.rows)
+            for j := range newGrids[i] {
+                newGrids[i][j] = make([]bool, l.cols)
+            }
+        }
+
+        l.gridStates = append(lhs, rhs...)
+        l.gridStates = append(l.gridStates, newGrids...) 
+    }
 }
 
 func (l Life) InsertGrid(grid [][]bool, xOffset int, yOffset int) {
@@ -103,7 +129,7 @@ func GridFromFile(path string) ([][]bool, error)  {
 }
 
 func (l *Life) Next() {
-    var nextGridIndex = (l.currentGridState + 1) % l.numGridStates
+    var nextGridIndex = (l.currentGridState + 1) % len(l.gridStates)
     var nextGrid = l.gridStates[nextGridIndex]
 
 
@@ -201,3 +227,4 @@ func (l Life) PrintGrid() {
 
     os.Stdout.Write(buffer)
 }
+

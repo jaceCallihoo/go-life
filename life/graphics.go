@@ -2,6 +2,7 @@ package life
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -22,80 +23,6 @@ var (
     COLOR_KINDA_BLUE = Color{R: 55, G: 55, B: 95}
 
     CURRENT_GAME_IDX = 0
-    GAME_PARAMS = []GameParam{
-        {
-            startingGrid: GRID1,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID2,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID3,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID4,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID5,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID6,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID7,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID8,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID9,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID10,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID11,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-        {
-            startingGrid: GRID12,
-            redChannelFunc: rowParabolic,
-            greenChannelFunc: colParabolic,
-            blueChannelFunc: flat200,
-        },
-    }
 )
 
 type GameParam struct {
@@ -105,8 +32,9 @@ type GameParam struct {
     blueChannelFunc func(*Game, int, int) byte
     inactiveColor Color 
     startingGrid [][]bool
+    scale int
+    histories int
 }
-
 
 type Game struct {
     life Life
@@ -123,6 +51,10 @@ type Game struct {
     inactiveColor Color
 
     scale int
+
+    skipDraw bool
+
+    gameIndex int
 }
 
 type Color struct {
@@ -136,67 +68,75 @@ func (g *Game) GetRows() int {
     return g.life.rows
 }
 
+func (g *Game) handleInput() {
+    if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+        g.gameIndex++
+        if g.gameIndex >= len(GAME_PARAMS) {
+            g.gameIndex = 0
+        }
+        g.loadGame(g.gameIndex)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+        g.gameIndex--
+        if g.gameIndex < 0 {
+            g.gameIndex = len(GAME_PARAMS) - 1
+        }
+        g.loadGame(g.gameIndex)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+        g.stepDelay -= 50 * time.Millisecond
+        g.stepDelay = max(g.stepDelay, 0)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+        g.stepDelay += 50 * time.Millisecond
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyR) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+        g.restartGame(g.gameIndex)
+    } else if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+        os.Exit(0)
+    } else if inpututil.IsKeyJustPressed(ebiten.Key1) {
+        fmt.Println("increase")
+        g.life.SetNumGridStates(len(g.life.gridStates) + 1)
+    } else if inpututil.IsKeyJustPressed(ebiten.Key2) {
+        fmt.Println("reduce")
+        g.life.SetNumGridStates(len(g.life.gridStates) - 1)
+    }
+}
 
 func (g *Game) Update() error {
-    // optimization: add a sleep
-    var now = time.Now()
+    now := time.Now()
     if now.Sub(g.lastStepTime) >= g.stepDelay {
         g.life.Next()
         g.lastStepTime = now
     }
-    fmt.Println(now)
 
-    // todo: use a switch instead?
-    // use up and down arrows to change speed
-    // should the state be saved whene moving back to a "demo"?
-    
-    // if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-    if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-        CURRENT_GAME_IDX++;
-        next_game := GAME_PARAMS[CURRENT_GAME_IDX]
-        g.life = next_game.life
-        g.setPixles()
-        // todo: set scale in game params
-
-        // todo: also need to set the window size
-        /*
-        g.redChannelFunc = next_game.redChannelFunc
-        g.greenChannelFunc = next_game.greenChannelFunc 
-        g.blueChannelFunc = next_game.blueChannelFunc 
-        g.inactiveColor = next_game.inactiveColor
-        */
-    } else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-
-    } else if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-        fmt.Println("up")
-        g.stepDelay -= 50 * time.Millisecond
-        g.stepDelay = max(g.stepDelay, 0)
-    } else if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-        fmt.Println("down")
-        g.stepDelay += 50 * time.Millisecond
-    } else if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-        // restart the game (set the grid state to the starting grid)
-    } else if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-        fmt.Println("escape")
-        return ebiten.Termination
-    }
+    g.handleInput()
 
     return nil
 }
 
+func (g *Game) restartGame(gameParamsIndex int) {
+    gp := &GAME_PARAMS[gameParamsIndex]
+    gp.life = NewLife(g.life.rows, g.life.cols)
+    gp.life.InsertGrid(gp.startingGrid, gp.life.cols / 2 - len(gp.startingGrid[0]) / 2, gp.life.rows / 2 - len(gp.startingGrid) / 2)
+    g.life = gp.life
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
+    if g.skipDraw {
+        g.skipDraw = false
+        return
+    }
+
     for i := range g.life.grid {
         for j := range g.life.grid[i] {
+            var color Color
             if g.life.grid[i][j] == true {
-                var color = Color {
+                color = Color {
                     R: g.redChannelFunc(g, i, j),
                     G: g.greenChannelFunc(g, i, j),
                     B: g.blueChannelFunc(g, i, j),
                 }
-                writePixel(g.pixelsGrid[i][j], color)
             } else {
-                writePixel(g.pixelsGrid[i][j], g.inactiveColor)
+                color = g.inactiveColor
             }
+            writePixel(g.pixelsGrid[i][j], color)
         }
     }
 
@@ -207,36 +147,40 @@ func (g *Game) Layout(oudsiteWidth, outsideHeight int) (screenWidth, screenHeigh
     return g.life.cols, g.life.rows
 }
 
-func NewGame(rows, cols, scale int) Game {
-    var game = Game {}
+func NewGame(gameParamsIndex int) Game {
+    game := Game {}
 
-    // initialize all different games
     for i := range(GAME_PARAMS) {
         gp := &GAME_PARAMS[i]
-        gp.life = NewLife(rows, cols)
         gp.life.InsertGrid(gp.startingGrid, gp.life.cols / 2 - len(gp.startingGrid[0]) / 2, gp.life.rows / 2 - len(gp.startingGrid) / 2)
-        gp.life.PrintGrid()
+        fmt.Println(gp.inactiveColor)
     }
-
-    game.life = GAME_PARAMS[0].life
-
-    game.life.PrintGrid()
-    game.scale = scale
 
     game.lastStepTime = time.Now()
     game.stepDelay = 200 * time.Millisecond
 
-    game.redChannelFunc = rowParabolic
-    game.greenChannelFunc = colParabolic
-    game.blueChannelFunc = flat200
-    game.inactiveColor = COLOR_SPACE_BLACK
-
-    // ebiten.SetWindowSize(cols * scale, rows * scale)
-    // game.life.InsertGrid(gameParams.startingGrid, cols / 2 - len(GRID12[0]) / 2, rows / 2 - len(GRID12) / 2)
-
-    game.setPixles()
+    game.loadGame(0)
 
     return game
+}
+
+func (g *Game) loadGame(gameParamsIndex int) {
+    gameParams := GAME_PARAMS[gameParamsIndex]
+
+    if gameParams.life.cols != g.life.cols || gameParams.life.rows != g.life.rows {
+        g.skipDraw = true
+    }
+
+    g.life = gameParams.life
+    g.life.SetNumGridStates(gameParams.histories)
+    g.redChannelFunc = gameParams.redChannelFunc
+    g.greenChannelFunc = gameParams.greenChannelFunc
+    g.blueChannelFunc = gameParams.blueChannelFunc 
+    g.inactiveColor = gameParams.inactiveColor
+    g.scale = gameParams.scale
+
+    ebiten.SetWindowSize(g.life.cols * g.scale, g.life.rows * g.scale)
+    g.setPixles()
 }
 
 func (g *Game) Run() {
@@ -246,10 +190,10 @@ func (g *Game) Run() {
 }
 
 func (g *Game) setPixles() {
-    var width, height = g.life.cols, g.life.rows
-    var pixels1d = make([]byte, 4 * width * height)
-    var pixels2d = Fracture(pixels1d, height)
-    var pixels3d = make([][][]byte, height)
+    width, height := g.life.cols, g.life.rows
+    pixels1d := make([]byte, 4 * width * height)
+    pixels2d := Fracture(pixels1d, height)
+    pixels3d := make([][][]byte, height)
 
     for i := range pixels2d {
         pixels3d[i] = Fracture(pixels2d[i], width)

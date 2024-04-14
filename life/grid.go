@@ -13,3 +13,4 @@ func NewGrid[T any](rows, cols int) Grid[T] {
     grid.cols = cols
     return grid
 }
+
