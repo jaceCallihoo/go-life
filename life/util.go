@@ -1,7 +1,7 @@
 package life
 
 import (
-   "cmp"
+	"cmp"
 )
 
 func copy2d[T any](dest, src [][]T) int {

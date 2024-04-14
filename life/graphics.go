@@ -1,7 +1,6 @@
 package life
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -91,10 +90,8 @@ func (g *Game) handleInput() {
     } else if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyQ) {
         os.Exit(0)
     } else if inpututil.IsKeyJustPressed(ebiten.Key1) {
-        fmt.Println("increase")
         g.life.SetNumGridStates(len(g.life.gridStates) + 1)
     } else if inpututil.IsKeyJustPressed(ebiten.Key2) {
-        fmt.Println("reduce")
         g.life.SetNumGridStates(len(g.life.gridStates) - 1)
     }
 }
@@ -124,10 +121,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
         return
     }
 
-    for i := range g.life.grid {
-        for j := range g.life.grid[i] {
+    grid := g.life.getCurrentGrid()
+    for i := range grid {
+        for j := range grid[i] {
             var color Color
-            if g.life.grid[i][j] == true {
+            if grid[i][j] == true {
                 color = Color {
                     R: g.redChannelFunc(g, i, j),
                     G: g.greenChannelFunc(g, i, j),
@@ -153,7 +151,6 @@ func NewGame(gameParamsIndex int) Game {
     for i := range(GAME_PARAMS) {
         gp := &GAME_PARAMS[i]
         gp.life.InsertGrid(gp.startingGrid, gp.life.cols / 2 - len(gp.startingGrid[0]) / 2, gp.life.rows / 2 - len(gp.startingGrid) / 2)
-        fmt.Println(gp.inactiveColor)
     }
 
     game.lastStepTime = time.Now()
@@ -178,8 +175,13 @@ func (g *Game) loadGame(gameParamsIndex int) {
     g.blueChannelFunc = gameParams.blueChannelFunc 
     g.inactiveColor = gameParams.inactiveColor
     g.scale = gameParams.scale
+    g.life.SetNumGridStates(gameParams.histories)
 
     ebiten.SetWindowSize(g.life.cols * g.scale, g.life.rows * g.scale)
+    displayWidth := 1920
+    displayHegiht := 1080
+    windowWidth, windowHeight := ebiten.WindowSize()
+    ebiten.SetWindowPosition(displayWidth / 2 - windowWidth / 2, displayHegiht / 2 - windowHeight / 2)
     g.setPixles()
 }
 

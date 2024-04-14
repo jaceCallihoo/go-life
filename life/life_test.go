@@ -1,6 +1,7 @@
 package life
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -88,7 +89,7 @@ func Test_InsertGrid(t *testing.T) {
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
 			c.life.InsertGrid(c.grid, c.xOffset, c.yOffset)
-			if !equalSlice2d(c.life.grid, c.expect) {
+			if !equalSlice2d(c.life.getCurrentGrid(), c.expect) {
 				t.Error()
 			}
 		})
@@ -186,7 +187,7 @@ func Test_cellLivesNext(t *testing.T) {
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
 			var life = NewLife(len(c.grid), len(c.grid[0]))
-			life.grid = c.grid
+			life.InsertGrid(c.grid, 0, 0) 
 			if life.cellLivesNext(c.row, c.col) != c.expect {
 				t.Error()
 			}
@@ -262,7 +263,7 @@ func Test_countLiveNeighbors(t *testing.T) {
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
 			var life = NewLife(len(c.grid), len(c.grid[0]))
-			life.grid = c.grid
+			life.InsertGrid(c.grid, 0, 0)
 			var val = life.countLiveNeighbors(c.row, c.col)
 			if val != c.expect {
 				t.Errorf("Expectend %d but recieved %d", c.expect, val)
@@ -363,12 +364,7 @@ func Test_SetNumGridStates(t *testing.T) {
 			},
 			expectGridStates: [][][]bool{
 				{
-					{true, false, false},
-					{false, false, false},
-					{false, false, false},
-				},
-				{
-					{false, true, false},
+					{false, true, false}, // 
 					{false, false, false},
 					{false, false, false},
 				},
@@ -380,6 +376,11 @@ func Test_SetNumGridStates(t *testing.T) {
 				{
 					{false, false, false},
 					{false, true, false},
+					{false, false, false},
+				},
+				{
+					{true, false, false},
+					{false, false, false},
 					{false, false, false},
 				},
 			},
@@ -416,18 +417,18 @@ func Test_SetNumGridStates(t *testing.T) {
 			},
 			expectGridStates: [][][]bool{
 				{
+					{false, true, false}, //
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{false, true, false},
+					{false, false, false},
+				},
+				{
 					{true, false, false},
 					{false, false, false},
-					{false, false, false},
-				},
-				{
-					{false, true, false},
-					{false, false, false},
-					{false, false, false},
-				},
-				{
-					{false, false, false},
-					{false, true, false},
 					{false, false, false},
 				},
 			},
@@ -457,12 +458,17 @@ func Test_SetNumGridStates(t *testing.T) {
 					{false, false, false},
 				},
 				{
-					{false, false, false},
+					{false, false, false}, //
 					{false, true, false},
 					{false, false, false},
 				},
 			},
 			expectGridStates: [][][]bool{
+				{
+					{false, false, false}, //
+					{false, true, false},
+					{false, false, false},
+				},
 				{
 					{false, false, true},
 					{false, false, false},
@@ -471,11 +477,6 @@ func Test_SetNumGridStates(t *testing.T) {
 				{
 					{false, false, false},
 					{true, false, false},
-					{false, false, false},
-				},
-				{
-					{false, false, false},
-					{false, true, false},
 					{false, false, false},
 				},
 			},
@@ -500,7 +501,7 @@ func Test_SetNumGridStates(t *testing.T) {
 					{false, false, false},
 				},
 				{
-					{false, false, false},
+					{false, false, false}, //
 					{true, false, false},
 					{false, false, false},
 				},
@@ -512,6 +513,11 @@ func Test_SetNumGridStates(t *testing.T) {
 			},
 			expectGridStates: [][][]bool{
 				{
+					{false, false, false}, //
+					{true, false, false},
+					{false, false, false},
+				},
+				{
 					{false, true, false},
 					{false, false, false},
 					{false, false, false},
@@ -519,11 +525,6 @@ func Test_SetNumGridStates(t *testing.T) {
 				{
 					{false, false, true},
 					{false, false, false},
-					{false, false, false},
-				},
-				{
-					{false, false, false},
-					{true, false, false},
 					{false, false, false},
 				},
 			},
@@ -587,11 +588,11 @@ func Test_SetNumGridStates(t *testing.T) {
 			},
 		},
 		{
-			name:             "Should insert empty grids at the end",
+			name:             "Should insert empty grids",
 			currentGridState: 0,
 			gridStates: [][][]bool{
 				{
-					{true, false, false},
+					{true, false, false}, // 
 					{false, false, false},
 					{false, false, false},
 				},
@@ -618,7 +619,17 @@ func Test_SetNumGridStates(t *testing.T) {
 			},
 			expectGridStates: [][][]bool{
 				{
-					{true, false, false},
+					{true, false, false}, // 
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
 					{false, false, false},
 					{false, false, false},
 				},
@@ -644,12 +655,75 @@ func Test_SetNumGridStates(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:             "Should insert grid before the current",
+			currentGridState: 1,
+			gridStates: [][][]bool{
+				{
+					{true, false, false},
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, true, false}, //
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, true},
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{true, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{false, true, false},
+					{false, false, false},
+				},
+			},
+			expectGridStates: [][][]bool{
+				{
+					{false, true, false}, //
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, true},
+					{false, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{true, false, false},
+					{false, false, false},
+				},
+				{
+					{false, false, false},
+					{false, true, false},
+					{false, false, false},
+				},
+				{
+					{true, false, false},
+					{false, false, false},
+					{false, false, false},
+				},
+			},
+		},
 	}
 
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
-			var expectNumGridStates = len(c.expectGridStates)
-			var l = NewLife(len(c.gridStates[0]), len(c.gridStates[0][0]))
+			expectNumGridStates := len(c.expectGridStates)
+			l := NewLife(len(c.gridStates[0]), len(c.gridStates[0][0]))
 			l.currentGridState = c.currentGridState
 			l.gridStates = c.gridStates
 
@@ -658,18 +732,50 @@ func Test_SetNumGridStates(t *testing.T) {
 			if len(l.gridStates) != len(c.expectGridStates) {
 				t.Fatalf("Unequal len(gridStates) - Recieved: %d, Expected: %d", len(l.gridStates), len(c.expectGridStates))
 			}
-
-			/*
 			for i := range l.gridStates {
-				if !equalSlice2d(l.gridStates[i], c.expectGridStates[i]) {
-					t.Errorf("Unequal gridState[%d]", i)
+				for j := range l.gridStates[i] {
+					for k := range l.gridStates[i][j] {
+						if l.gridStates[i][j][k] {
+							fmt.Print("#")
+							// log.Printf("Live at (%d,%d) in index %d", j, k, i)
+						} else {
+							fmt.Print(".")
+						}
+					}
+					fmt.Print("\n")
+				}
+				if i == l.currentGridState {
+					fmt.Print(" ^\n")
+				} else {
+					fmt.Print("\n")
 				}
 			}
-			*/
+
+			fmt.Println("------------------------")
+			for i := range c.expectGridStates {
+				for j := range c.expectGridStates[i] {
+					for k := range c.expectGridStates[i][j] {
+						if c.expectGridStates[i][j][k] {
+							fmt.Print("#")
+							// log.Printf("Live at (%d,%d) in index %d", j, k, i)
+						} else {
+							fmt.Print(".")
+						}
+					}
+					fmt.Print("\n")
+				}
+				if i == 0 {
+					fmt.Print(" ^\n")
+				} else {
+					fmt.Print("\n")
+				}
+			}
+
 			for i := range l.gridStates {
 				nthOutputGridIndex := (i + l.currentGridState) % len(l.gridStates)
 				nthExpectedGridIndex := i
-				if equalSlice2d(l.gridStates[nthOutputGridIndex], c.expectGridStates[nthExpectedGridIndex]) {
+				// fmt.Printf("Comapring output %d and expected %d", nthOutputGridIndex, nthExpectedGridIndex)
+				if !equalSlice2d(l.gridStates[nthOutputGridIndex], c.expectGridStates[nthExpectedGridIndex]) {
 					t.Errorf("Unequal gridState[%d]", i)
 				}
 			} 
